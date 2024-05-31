@@ -7,6 +7,10 @@ const compression = require('compression');
 const helmet = require('helmet')
 const cors = require('cors')
 
+const indexRouter = require('./routes/index');
+const signUpRouter = require('./routes/sign-up');
+const loginRouter = require('./routes/login');
+
 require('dotenv').config();
 
 const app = express();
@@ -36,6 +40,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/', indexRouter);
+app.use('/sign-up', signUpRouter);
+app.use('/login', loginRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -50,7 +57,7 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.json({ error: err.message});
 });
 
-module.exports = app;
+app.listen(5000, () => console.log('Server started on port 5000.'));
