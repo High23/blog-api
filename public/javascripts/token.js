@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 require('dotenv').config();
 
-function verifyToken(req, res, next) {
+function verifyTokenHeaderExists(req, res, next) {
     const bearerHeader = req.headers["authorization"];
     if (typeof bearerHeader !== 'undefined') {
         const bearer = bearerHeader.split(' ');
@@ -14,4 +14,4 @@ function verifyToken(req, res, next) {
     }
 }
 
-module.exports = {verifyToken}
+module.exports = {verifyTokenHeaderExists}
