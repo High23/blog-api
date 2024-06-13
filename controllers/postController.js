@@ -6,6 +6,14 @@ const Post = require('../models/post');
 
 require('dotenv').config()
 
+exports.getPost = [
+    verifyTokenHeaderExists,
+    asyncHandler(async function(req, res, next) {
+        const post = await Post.findById(req.params.postId).populate('author').exec()
+        res.json({ post })
+    })
+]
+
 exports.createGet = [ 
     verifyTokenHeaderExists,
     asyncHandler(async function(req, res, next) {
