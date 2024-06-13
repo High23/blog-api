@@ -7,7 +7,7 @@ const Post = require('../models/post');
 require('dotenv').config()
 
 exports.getAllPosts = asyncHandler(async function(req, res, next) {
-    const posts = await Post.find().populate('author', 'username').exec()
+    const posts = await Post.find({published: true}).populate('author', 'username').sort({date: -1}).exec()
     res.json({ posts })
 })
 
