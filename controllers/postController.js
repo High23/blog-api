@@ -103,3 +103,11 @@ exports.editPost = [
         }
     })
 ]
+
+exports.deletePost = [
+    verifyTokenHeaderExists,
+    asyncHandler( async function(req, res, next) {
+        await Post.findByIdAndDelete(req.params.postId);
+        res.status(200).json({message: 'post deleted'});
+    })
+]

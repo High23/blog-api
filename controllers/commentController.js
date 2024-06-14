@@ -35,3 +35,11 @@ exports.createCommentPost = [
         }
     })
 ]
+
+exports.deleteComment = [
+    verifyTokenHeaderExists,
+    asyncHandler( async function(req, res, next) {
+        await Comment.findByIdAndDelete(req.params.commentId);
+        res.status(200).json({message: 'comment deleted'});
+    })
+]
