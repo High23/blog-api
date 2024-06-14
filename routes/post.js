@@ -9,9 +9,11 @@ router.post("/create", postController.createPost);
 
 router.post("/:postId/comment/create", commentController.createCommentPost)
 
+router.delete("/:postId/delete", postController.deletePost)
+
 router.get("/:postId/edit", postController.editPostGet)
 
-router.post("/:postId/edit", postController.editPost)
+router.put("/:postId/edit", postController.editPost)
 
 router.get("/:postId", postController.getPost)
 
