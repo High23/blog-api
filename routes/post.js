@@ -9,6 +9,10 @@ router.post("/create", postController.createPost);
 
 router.post("/:postId/comment/create", commentController.createCommentPost)
 
+router.get("/:postId/edit", postController.editPostGet)
+
+router.post("/:postId/edit", postController.editPost)
+
 router.get("/:postId", postController.getPost)
 
 module.exports = router;
