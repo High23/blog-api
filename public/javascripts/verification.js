@@ -24,4 +24,14 @@ async function isBlogAuthorOrIsCommentAuthor(req, res, next) {
     }
 }
 
-module.exports =  { alreadyLoggedIn, isBlogAuthorOrIsCommentAuthor }
+async function isBlogAuthor(req, res, next) {
+    const blog = await Post.findById(req.params.postId).exec()
+    const userId = jwt.verify(req.token, process.env.SECRET).user._id;
+    if (blog.author.toString() === userId) {
+        next();
+    } else {
+        res.sendStatus(403);
+    }
+}
+
+module.exports =  { alreadyLoggedIn, isBlogAuthorOrIsCommentAuthor, isBlogAuthor }
