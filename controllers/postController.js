@@ -98,7 +98,7 @@ exports.editPost = [
             });
             return
         } else {
-            await Post.findByIdAndUpdate(req.params.postId, post, {})
+            await Post.findByIdAndUpdate(req.params.postId, post, {}).exec();
             res.sendStatus(200);
         }
     })
@@ -107,7 +107,12 @@ exports.editPost = [
 exports.deletePost = [
     verifyTokenHeaderExists,
     asyncHandler( async function(req, res, next) {
-        await Post.findByIdAndDelete(req.params.postId);
-        res.status(200).json({message: 'post deleted'});
+        const post = await Post.findByIdAndDelete(req.params.postId).exec();
+        if (post !== null) {
+            res.status(200).json({message: 'post deleted'});
+        } else {
+            res.status(404).json({message: 'post does not exist'})
+        }
+        
     })
 ]
