@@ -3,6 +3,8 @@ const asyncHandler = require("express-async-handler");
 const jwt = require('jsonwebtoken');
 const { verifyTokenHeaderExists } = require("../public/javascripts/token");
 const Comment = require('../models/comment');
+const { isBlogAuthorOrIsCommentAuthor } = require("../public/javascripts/verification");
+
 
 require('dotenv').config()
 
@@ -38,8 +40,14 @@ exports.createCommentPost = [
 
 exports.deleteComment = [
     verifyTokenHeaderExists,
+    asyncHandler(isBlogAuthorOrIsCommentAuthor),
     asyncHandler( async function(req, res, next) {
-        await Comment.findByIdAndDelete(req.params.commentId);
-        res.status(200).json({message: 'comment deleted'});
+        const comment = await Comment.findByIdAndDelete(req.params.commentId).exec();
+        console.log(comment)
+        if (comment !== null) {
+            res.status(200).json({message: 'comment deleted', comment});
+        } else {
+            res.status(404).json({message: 'comment does not exist'})
+        }
     })
 ]
