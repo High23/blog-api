@@ -3,8 +3,16 @@ const asyncHandler = require("express-async-handler");
 const User = require("../models/user");
 const jwt = require('jsonwebtoken');
 const bcrypt = require("bcryptjs");
+const { alreadyLoggedIn } = require("../public/javascripts/verification");
 
 require('dotenv').config();
+
+exports.loginGet = [
+    alreadyLoggedIn,
+    asyncHandler(async function (req, res, next) {
+        res.sendStatus(200);
+    })
+]
 
 exports.loginPost = [
     body("username")
