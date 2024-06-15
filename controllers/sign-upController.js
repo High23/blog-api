@@ -36,18 +36,18 @@ exports.createUserPost = [
     
     asyncHandler(async (req, res, next) => {
         const errors = validationResult(req);
-        const role = req.body.author === 'on' ? true : false;
+        const author = req.body.author === 'on' ? true : false;
         const user = new User({
             username: req.body.username,
             password: await bcrypt.hash(req.body.password, 10),
-            role: role,
+            author: author,
         });
         
         if (!errors.isEmpty()) {
             res.json({
                 user: user,
                 errors: errors.array(),
-                checked: role,
+                checked: author,
             });
             return
         };
