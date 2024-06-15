@@ -1,6 +1,7 @@
 const Post = require("../../models/post");
 const Comment = require("../../models/comment");
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const User = require("../../models/user");
 
 function alreadyLoggedIn(req, res, next) {
     const bearerHeader = req.headers["authorization"];
@@ -34,4 +35,14 @@ async function isBlogAuthor(req, res, next) {
     }
 }
 
-module.exports =  { alreadyLoggedIn, isBlogAuthorOrIsCommentAuthor, isBlogAuthor }
+async function isAuthor(req, res, next) {
+    const userId = jwt.verify(req.token, process.env.SECRET).user._id;
+    const user = User.findById(userId);
+    if (user.author) {
+        next()
+    } else {
+        res.sendStatus(403)
+    }
+}
+
+module.exports =  { alreadyLoggedIn, isBlogAuthorOrIsCommentAuthor, isBlogAuthor, isAuthor }

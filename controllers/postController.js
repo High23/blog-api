@@ -3,7 +3,7 @@ const asyncHandler = require("express-async-handler");
 const jwt = require('jsonwebtoken');
 const { verifyTokenHeaderExists } = require("../public/javascripts/token");
 const Post = require('../models/post');
-const { isBlogAuthor } = require("../public/javascripts/verification");
+const { isBlogAuthor, isAuthor } = require("../public/javascripts/verification");
 
 require('dotenv').config()
 
@@ -19,6 +19,7 @@ exports.getPost = asyncHandler(async function(req, res, next) {
 
 exports.createGet = [ 
     verifyTokenHeaderExists,
+    asyncHandler(isAuthor),
     asyncHandler(async function(req, res, next) {
         res.sendStatus(200)
     })
@@ -26,6 +27,7 @@ exports.createGet = [
 
 exports.createPost = [
     verifyTokenHeaderExists,
+    asyncHandler(isAuthor),
 
     body('title')
     .trim()
@@ -62,7 +64,7 @@ exports.createPost = [
 
 exports.editPostGet = [
     verifyTokenHeaderExists,
-    isBlogAuthor,
+    asyncHandler(isBlogAuthor),
     asyncHandler( async function(req, res, next) {
         res.sendStatus(200)
     })
@@ -71,7 +73,7 @@ exports.editPostGet = [
 exports.editPost = [
     verifyTokenHeaderExists,
 
-    isBlogAuthor,
+    asyncHandler(isBlogAuthor),
 
     body('title')
     .trim()
@@ -110,7 +112,7 @@ exports.editPost = [
 
 exports.deletePost = [
     verifyTokenHeaderExists,
-    isBlogAuthor,
+    asyncHandler(isBlogAuthor),
     asyncHandler( async function(req, res, next) {
         const post = await Post.findByIdAndDelete(req.params.postId).exec();
         if (post !== null) {
@@ -118,6 +120,5 @@ exports.deletePost = [
         } else {
             res.status(404).json({message: 'post does not exist'})
         }
-        
     })
 ]
