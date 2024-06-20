@@ -15,6 +15,7 @@ exports.loginGet = [
 ]
 
 exports.loginPost = [
+    alreadyLoggedIn,
     body("username")
     .trim()
     .isLength({min: 1, max: 100})
