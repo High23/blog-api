@@ -1,21 +1,30 @@
 const {body, validationResult} = require("express-validator");
 const asyncHandler = require("express-async-handler");
 const jwt = require('jsonwebtoken');
-const { verifyTokenHeaderExists } = require("../public/javascripts/token");
+const { verifyTokenHeaderExists, setTokenIfLoggedIn } = require("../public/javascripts/token");
 const Post = require('../models/post');
 const { isBlogAuthor, isAuthor } = require("../public/javascripts/verification");
 
 require('dotenv').config()
 
 exports.getAllPosts = asyncHandler(async function(req, res, next) {
-    const posts = await Post.find({published: true}).populate('author', 'username').sort({date: -1}).exec()
-    res.json({ posts })
+    const posts = await Post.find({published: true}).populate('author', 'username').sort({date: -1}).exec();
+    res.json({ posts });
 })
 
-exports.getPost = asyncHandler(async function(req, res, next) {
-    const post = await Post.findById(req.params.postId).populate('author', 'username').exec()
-    res.json({ post })
-})
+exports.getPost =[setTokenIfLoggedIn, asyncHandler(async function(req, res, next) {
+    const post = await Post.findById(req.params.postId).populate('author', 'username').exec();
+    if (post === null) {
+        return res.status(404).json({message: 'post does not exist'});
+    }
+    const userId = typeof req.token !== 'undefined' && jwt.verify(req.token, process.env.SECRET).user._id;
+    if (post.published) 
+        res.json({ post });
+    else if ( post.author._id.toString() === userId ) 
+        res.json({ post });
+    else 
+        res.sendStatus(403);
+})]
 
 exports.createGet = [ 
     verifyTokenHeaderExists,
@@ -115,10 +124,40 @@ exports.deletePost = [
     asyncHandler(isBlogAuthor),
     asyncHandler( async function(req, res, next) {
         const post = await Post.findByIdAndDelete(req.params.postId).exec();
-        if (post !== null) {
+        if (post !== null)
             res.status(200).json({message: 'post deleted'});
-        } else {
+        else 
             res.status(404).json({message: 'post does not exist'})
-        }
+    })
+]
+
+
+exports.publish = [
+    verifyTokenHeaderExists,
+
+    asyncHandler(isBlogAuthor),
+
+    asyncHandler( async function(req, res, next) {
+        const post = await Post.findById(req.params.postId);
+        if (post === null) 
+            return res.status(404).json({message: 'post does not exist'});
+        post.published = true;
+        await Post.findByIdAndUpdate(req.params.postId, post, {}).exec();
+        res.sendStatus(200);
+    })
+]
+
+exports.unpublish = [
+    verifyTokenHeaderExists,
+
+    asyncHandler(isBlogAuthor),
+
+    asyncHandler( async function(req, res, next) {
+        const post = await Post.findById(req.params.postId);
+        if (post === null)
+            return res.status(404).json({message: 'post does not exist'});
+        post.published = false;
+        await Post.findByIdAndUpdate(req.params.postId, post, {}).exec();
+        res.sendStatus(200);
     })
 ]
