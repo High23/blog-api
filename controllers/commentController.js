@@ -43,11 +43,9 @@ exports.deleteComment = [
     asyncHandler(isBlogAuthorOrIsCommentAuthor),
     asyncHandler( async function(req, res, next) {
         const comment = await Comment.findByIdAndDelete(req.params.commentId).exec();
-        console.log(comment)
-        if (comment !== null) {
+        if (comment !== null) 
             res.status(200).json({message: 'comment deleted', comment});
-        } else {
-            res.status(404).json({message: 'comment does not exist'})
-        }
+        else 
+            res.status(404).json({message: 'comment does not exist'});
     })
 ]
