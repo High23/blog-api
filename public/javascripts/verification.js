@@ -45,4 +45,13 @@ async function isAuthor(req, res, next) {
     }
 }
 
-module.exports =  { alreadyLoggedIn, isBlogAuthorOrIsCommentAuthor, isBlogAuthor, isAuthor }
+async function checkIfCurrentUser(req, res, next) {
+    const userId = jwt.verify(req.token, process.env.SECRET).user._id;
+    if (userId === req.params.userId) {
+        next()
+    } else {
+        res.sendStatus(403)
+    }
+}
+
+module.exports =  { alreadyLoggedIn, isBlogAuthorOrIsCommentAuthor, isBlogAuthor, isAuthor, checkIfCurrentUser }
