@@ -17,6 +17,10 @@ router.get("/:postId/edit", postController.editPostGet)
 
 router.put("/:postId/edit", postController.editPost)
 
+router.put("/:postId/publish", postController.publish)
+
+router.put("/:postId/unpublish", postController.unpublish)
+
 router.get("/:postId", postController.getPost)
 
 module.exports = router;
