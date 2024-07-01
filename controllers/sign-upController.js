@@ -6,7 +6,7 @@ const User = require('../models/user');
 exports.createUserGet = (req, res) => res.json('sign-up-form');
 
 exports.createUserPost = [
-    body('username')
+    body('username', "The username can not be empty.")
         .trim()
         .isLength({ min: 1, max: 100 })
         .custom(async (value) => {
@@ -33,7 +33,8 @@ exports.createUserPost = [
         pointsForContainingNumber: 10,
         pointsForContainingSymbol: 10,
     }),
-    body('confirmPassword', 'The passwords NEED to match.').custom(
+    body('confirmPassword', 'The passwords NEED to match.')
+    .custom(
         (value, { req }) => value === req.body.password,
     ),
 
@@ -48,7 +49,7 @@ exports.createUserPost = [
 
         if (!errors.isEmpty()) {
             res.json({
-                user,
+                username: req.body.username,
                 errors: errors.array(),
                 checked: author,
             });

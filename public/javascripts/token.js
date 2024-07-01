@@ -7,7 +7,7 @@ function verifyTokenHeaderExists(req, res, next) {
     if (typeof bearerHeader !== 'undefined') {
         const bearer = bearerHeader.split(' ');
         const bearerToken = bearer[1];
-        req.token = bearerToken
+        req.token = bearerToken;
         next();
     } else {
         res.sendStatus(403);
@@ -19,9 +19,9 @@ function setTokenIfLoggedIn(req, res, next) {
     if (typeof bearerHeader !== 'undefined') {
         const bearer = bearerHeader.split(' ');
         const bearerToken = bearer[1];
-        req.token = bearerToken
+        req.token = bearerToken;
     }
     next();
 }
 
-module.exports = {verifyTokenHeaderExists, setTokenIfLoggedIn}
+module.exports = {verifyTokenHeaderExists, setTokenIfLoggedIn};
