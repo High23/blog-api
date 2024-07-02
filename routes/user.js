@@ -5,6 +5,8 @@ const userController = require('../controllers/userController');
 
 router.get('/', userController.getCurrentUser);
 
+router.get('/:userId/edit', userController.editCurrentUserGet);
+
 router.post('/:userId/edit', userController.editCurrentUser);
 
 router.get('/:userId', userController.getUser);

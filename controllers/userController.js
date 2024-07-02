@@ -52,6 +52,24 @@ exports.getUserComments = [
     }),
 ];
 
+exports.editCurrentUserGet = [
+    verifyTokenHeaderExists,
+    asyncHandler(checkIfCurrentUser),
+
+    asyncHandler(async (req, res) => {
+        const user = await User.findById(req.params.userId, {
+            password: 0,
+        }).exec();
+        if (user === null) {
+            res.status.json({
+                error: 'User does not exist',
+            });
+            return;
+        }
+        res.json({user});
+    }),
+];
+
 exports.editCurrentUser = [
     verifyTokenHeaderExists,
     asyncHandler(checkIfCurrentUser),
@@ -59,19 +77,13 @@ exports.editCurrentUser = [
     body('username')
         .trim()
         .isLength({ min: 1, max: 100 })
-        .custom(async (value) => {
-            const user = await User.findOne({ username: value }).exec();
-            if (user) {
-                throw new Error('Username already in use');
-            }
-        })
         .escape(),
 
     body(
         'password',
         'The password needs a uppercase(A), lowercase(A) character as well as a number(1), a symbol(#) and have a minimum length of 7.',
     )
-        .optional()
+        .optional({checkFalsy: true})
         .isStrongPassword({
             minLength: 7,
             minLowercase: 1,
@@ -99,15 +111,25 @@ exports.editCurrentUser = [
     asyncHandler(async (req, res) => {
         const errors = validationResult(req);
         const author = req.body.author === 'on';
-        const user = new User({
-            username: req.body.username,
-            password: await bcrypt.hash(req.body.password, 10),
-            author,
-            _id: req.params.userId,
-        });
+        let user;
+        if (req.body.password === '') {
+            user = new User({
+                username: req.body.username,
+                author,
+                _id: req.params.userId,
+            });
+        } else {
+            user = new User({
+                username: req.body.username,
+                password: await bcrypt.hash(req.body.password, 10),
+                author,
+                _id: req.params.userId,
+            });
+        }
         if (!errors.isEmpty()) {
             res.json({
                 user,
+                username: req.body.username,
                 errors: errors.array(),
                 checked: author,
             });
