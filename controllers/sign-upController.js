@@ -9,12 +9,6 @@ exports.createUserPost = [
     body('username', "The username can not be empty.")
         .trim()
         .isLength({ min: 1, max: 100 })
-        .custom(async (value) => {
-            const user = await User.findOne({ username: value });
-            if (user) {
-                throw new Error('Username already in use');
-            }
-        })
         .escape(),
     body(
         'password',
