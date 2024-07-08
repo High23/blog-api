@@ -16,8 +16,17 @@ exports.loginGet = [
 
 exports.loginPost = [
     alreadyLoggedIn,
-    body('username').trim().isLength({ min: 1, max: 100 }).escape(),
-    body('password').trim().isLength({ min: 1, max: 100 }).escape(),
+    body('username', 'The username field MUST not be empty')
+        .trim()
+        .isLength({ min: 1, max: 100 })
+        .escape(),
+    body(
+        'password',
+        'The password can not be empty/have a minimum length less than 7.'
+    )
+        .trim()
+        .isLength({ min: 7 })
+        .escape(),
 
     asyncHandler(async (req, res, next) => {
         const errors = validationResult(req);
@@ -30,14 +39,12 @@ exports.loginPost = [
 
         const user = await User.findOne({ username: req.body.username });
         if (!user) {
-            return res
-                .status(400)
-                .json({ loginError: 'Username does not exist.' });
+            res.status(400).json({ loginError: 'Username does not exist.' });
         }
         const match = await bcrypt.compare(req.body.password, user.password);
         if (!match) {
             // passwords do not match!
-            return res.status(400).json({ loginError: 'Invalid password' });
+            res.status(400).json({ loginError: 'Invalid password' });
         }
 
         jwt.sign({ user }, process.env.SECRET, (err, token) => {

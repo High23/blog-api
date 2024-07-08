@@ -6,7 +6,7 @@ const User = require('../models/user');
 exports.createUserGet = (req, res) => res.json('sign-up-form');
 
 exports.createUserPost = [
-    body('username', "The username can not be empty.")
+    body('username', 'The username can not be empty.')
         .trim()
         .isLength({ min: 1, max: 100 })
         .escape(),
