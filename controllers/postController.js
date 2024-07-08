@@ -10,6 +10,7 @@ const {
     isBlogAuthor,
     isAuthor,
 } = require('../public/javascripts/verification');
+const Comment = require('../models/comment');
 
 require('dotenv').config();
 
@@ -18,23 +19,26 @@ exports.getAllPosts = asyncHandler(async (req, res, next) => {
         .populate('author', 'username')
         .sort({ date: -1 })
         .exec();
-    res.json({ posts });
+    return res.json({ posts });
 });
 
 exports.getPost = [
     setTokenIfLoggedIn,
     asyncHandler(async (req, res, next) => {
-        const post = await Post.findById(req.params.postId)
+        const [post, postComments] = await Promise.all([
+            Post.findById(req.params.postId)
             .populate('author', 'username')
-            .exec();
+            .exec(),
+            Comment.find({post: req.params.postId}).exec()
+        ]);
         if (post === null) {
             return res.status(404).json({ message: 'post does not exist' });
         }
         const userId =
             typeof req.token !== 'undefined' &&
             jwt.verify(req.token, process.env.SECRET).user._id;
-        if (post.published) res.json({ post });
-        else if (post.author._id.toString() === userId) res.json({ post });
+        if (post.published) res.json({ post, postComments });
+        else if (post.author._id.toString() === userId) res.json({ post, postComments });
         else res.sendStatus(403);
     }),
 ];
