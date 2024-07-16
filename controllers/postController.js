@@ -29,17 +29,16 @@ exports.getPost = [
             Post.findById(req.params.postId)
             .populate('author', 'username')
             .exec(),
-            Comment.find({post: req.params.postId}).exec()
+            Comment.find({post: req.params.postId})
+            .populate('author',  'username').exec()
         ]);
         if (post === null) {
             return res.status(404).json({ message: 'post does not exist' });
         }
-        const userId =
-            typeof req.token !== 'undefined' &&
-            jwt.verify(req.token, process.env.SECRET).user._id;
+        const userId = req.user !== undefined && req.user._id;
         if (post.published) res.json({ post, postComments });
         else if (post.author._id.toString() === userId) res.json({ post, postComments });
-        else res.sendStatus(403);
+        else res.status(403).json({ message: "Forbidden" });
     }),
 ];
 
@@ -61,7 +60,8 @@ exports.createPost = [
 
     asyncHandler(async (req, res, next) => {
         const errors = validationResult(req);
-        const userId = jwt.verify(req.token, process.env.SECRET).user._id;
+        const user = req.user;
+        const userId = user._id;
         const published = req.body.published === 'on';
         const post = new Post({
             title: req.body.title,
@@ -85,7 +85,8 @@ exports.editPostGet = [
     verifyTokenHeaderExists,
     asyncHandler(isBlogAuthor),
     asyncHandler(async (req, res, next) => {
-        res.sendStatus(200);
+        const post = await Post.findById(req.params.postId).exec()
+        res.json(post);
     }),
 ];
 
@@ -100,7 +101,8 @@ exports.editPost = [
 
     asyncHandler(async (req, res, next) => {
         const errors = validationResult(req);
-        const userId = jwt.verify(req.token, process.env.SECRET).user._id;
+        const user = req.user;
+        const userId = user._id;
         const published = req.body.published === 'on';
         const post = new Post({
             title: req.body.title,
@@ -126,7 +128,10 @@ exports.deletePost = [
     verifyTokenHeaderExists,
     asyncHandler(isBlogAuthor),
     asyncHandler(async (req, res, next) => {
-        const post = await Post.findByIdAndDelete(req.params.postId).exec();
+        const [post, deletedComments] = await Promise.all([
+            Post.findByIdAndDelete(req.params.postId).exec(),
+            Comment.deleteMany({post: req.params.postId}).exec()
+        ]);
         if (post !== null) res.status(200).json({ message: 'post deleted' });
         else res.status(404).json({ message: 'post does not exist' });
     }),
@@ -138,7 +143,7 @@ exports.publish = [
     asyncHandler(isBlogAuthor),
 
     asyncHandler(async (req, res, next) => {
-        const post = await Post.findById(req.params.postId);
+        const post = await Post.findById(req.params.postId).exec();
         if (post === null)
             return res.status(404).json({ message: 'post does not exist' });
         post.published = true;
