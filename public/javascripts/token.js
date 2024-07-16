@@ -4,11 +4,15 @@ require('dotenv').config();
 
 function verifyTokenHeaderExists(req, res, next) {
     const bearerHeader = req.headers["authorization"];
-    if (typeof bearerHeader !== 'undefined') {
-        const bearer = bearerHeader.split(' ');
-        const bearerToken = bearer[1];
-        req.token = bearerToken;
-        next();
+    const bearerToken = bearerHeader && bearerHeader.split(' ')[1];
+    if (bearerToken !== null || bearerToken !== undefined) {
+        jwt.verify(bearerToken, process.env.SECRET, (err, user) => {
+            // user value that we used in sign
+            if (err) return res.status(403).json({message: "You are not authorized"});
+            req.token = bearerToken;
+            req.user = user.user;
+            next();
+        });
     } else {
         res.sendStatus(403);
     }
@@ -16,12 +20,21 @@ function verifyTokenHeaderExists(req, res, next) {
 
 function setTokenIfLoggedIn(req, res, next) {
     const bearerHeader = req.headers["authorization"];
-    if (typeof bearerHeader !== 'undefined') {
-        const bearer = bearerHeader.split(' ');
-        const bearerToken = bearer[1];
-        req.token = bearerToken;
+    const bearerToken = bearerHeader && bearerHeader.split(' ')[1];
+    if (bearerToken !== null || bearerToken !== undefined) {
+        jwt.verify(bearerToken, process.env.SECRET, (err, user) => {
+            // user value that we used in sign
+            if (err) {
+                next();
+                return;
+            }
+            req.token = bearerToken;
+            req.user = user.user;
+            next();
+        });
+    } else {
+        next();
     }
-    next();
 }
 
 module.exports = {verifyTokenHeaderExists, setTokenIfLoggedIn};
