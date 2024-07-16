@@ -3,12 +3,16 @@ const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 
-exports.createUserGet = (req, res) => res.json('sign-up-form');
-
 exports.createUserPost = [
     body('username', 'The username can not be empty.')
         .trim()
         .isLength({ min: 1, max: 100 })
+        .custom(async (value) => {
+            const user = await User.findOne({ username: value });
+            if (user) {
+                throw new Error('Username already in use');
+            }
+        })
         .escape(),
     body(
         'password',
@@ -50,6 +54,6 @@ exports.createUserPost = [
             return;
         }
         await user.save();
-        res.redirect('/login');
+        res.json({message: 'success'});
     }),
 ];
