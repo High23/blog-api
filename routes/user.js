@@ -13,6 +13,8 @@ router.get('/:userId', userController.getUser);
 
 router.get('/:userId/posts', userController.getUserPosts);
 
+router.get('/:userId/allPosts', userController.getAllUserPosts);
+
 router.get('/:userId/comments', userController.getUserComments);
 
 module.exports = router;
