@@ -16,14 +16,14 @@ exports.createCommentPost = [
 
     asyncHandler(async (req, res, next) => {
         const errors = validationResult(req);
-        const userId = jwt.verify(req.token, process.env.SECRET).user._id;
+        const user = req.user;
+        const userId = user._id;
         const comment = new Comment({
             text: req.body.text,
             date: new Date(),
             author: userId,
             post: req.params.postId,
         });
-
         if (!errors.isEmpty()) {
             res.json({
                 errors: errors.array(),
